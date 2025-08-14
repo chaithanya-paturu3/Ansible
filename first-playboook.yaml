@@ -1,0 +1,78 @@
+- hosts: all
+  become: true
+  tasks:
+    - name: Install apache httpd
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+        update_cache: yes
+    - name: Copy file with owner and permissions
+      ansible.builtin.copy:
+        src: index.html
+        dest: /var/www/html
+        owner: root
+        group: root
+        mode: '0644'
+
+
+# Explanation#
+# This Ansible playbook is designed to be run on all hosts in the inventory. It performs two main tasks:
+# 1. Installs the Apache HTTP server (apache2) on all hosts.
+# 2. Copies the local index.html file to the web server's document root with the specified ownership and permissions.
+
+# 1. - hosts: all
+# This defines which servers the playbook will run on.
+# all = all hosts defined in your inventory file (/etc/ansible/hosts).
+# Example: If your inventory has web1 and web2, this playbook will run on both.
+# 2. become: true
+# This allows privilege escalation (like sudo) to perform tasks that require root access.
+# Installing packages or writing files in /var/www/html needs root, so this is essential.
+# 3. tasks:
+# The list of actions Ansible will perform on the target hosts.
+# Each task usually has:
+# name: Human-readable description (for logs and readability)
+# Module: The Ansible module used to perform the action
+# e.g., ansible.builtin.apt, ansible.builtin.copy
+
+# Task 1: Install Apache
+
+# tasks:
+#     - name: Install apache httpd
+#       ansible.builtin.apt:
+#         name: apache2
+#         state: present
+#         update_cache: yes
+
+#   Explanation:
+# name: Install apache httpd → Just a description of the task.
+# ansible.builtin.apt → Uses the APT module (for Debian/Ubuntu systems) to manage packages.
+# name: apache2 → The package to install.
+# state: present → Ensure the package is installed. (Other options: absent to remove)
+# update_cache: yes → Updates the package list before installing (like apt-get update).
+# Real-world effect:
+# Apache web server is installed on all your target servers if it’s not already present.
+
+  # Task 2: Copy File with Owner & Permissions
+
+  # - name: Copy file with owner and permissions
+  #   ansible.builtin.copy:
+  #     src: index.html
+  #     dest: /var/www/html
+  #     owner: root
+  #     group: root
+  #     mode: '0644'
+# Explanation:
+# name: Copy file with owner and permissions → Description of the task.
+# ansible.builtin.copy → Uses the copy module to transfer files.
+# src: index.html → The source file on the control machine.
+# dest: /var/www/html → The destination path on the target machine.
+# owner: root → Sets the file owner to root.
+# group: root → Sets the file group to root.
+# mode: '0644' → Sets the file permissions to read/write for owner, read for group and others.
+
+
+# ✅ Extra Notes:
+
+# The playbook is idempotent: running it multiple times won’t reinstall Apache unnecessarily or overwrite files unless needed.
+
+# Works for Ubuntu/Debian because we’re using apt. For RHEL/CentOS, you’d use ansible.builtin.yum.
